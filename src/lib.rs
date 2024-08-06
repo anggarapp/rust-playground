@@ -46,3 +46,11 @@ impl Testy {
         sum
     }
 }
+
+#[test]
+fn test_using_env_on_lib() {
+    assert_eq!(
+        dotenv::var("TEST_ENV").unwrap(),
+        "maidenlesstarnished".to_string()
+    );
+}
