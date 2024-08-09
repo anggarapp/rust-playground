@@ -1,0 +1,14 @@
+version: '3'
+services:
+  database:
+    image: postgres:alpine
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_DB=${PG_NAME:-pgtest}
+      - POSTGRES_USER=${PG_USER:-postgres}
+      - POSTGRES_PASSWORD=${PG_PASSWORD:-testpwd}
+      - POSTGRES_HOST_AUTH_METHOD=trust
+      - TZ=$TIME_ZONE
+    volumes:
+      - ./data:/var/lib/postgresql/data
