@@ -133,9 +133,73 @@ async fn test_delete_row_using_sqlx() -> Result<(), sqlx::Error> {
 
 #[tokio::test]
 async fn test_transaction_success_using_sqlx() -> Result<(), sqlx::Error> {
+    use sqlx::postgres::PgPoolOptions;
+    let pool = PgPoolOptions::new()
+        .max_connections(3)
+        .connect(dotenv::var("TEST_DB_STRING").unwrap().as_str())
+        .await?;
+    let row_first: Vec<TestModel> = sqlx::query_as("select * from test")
+        .fetch_all(&pool)
+        .await?;
+
+    {
+        let mut tx = pool.begin().await?;
+        let the_id: (i32,) = sqlx::query_as("INSERT INTO test (place) VALUES ($1) RETURNING id")
+            .bind("Notgauard".to_string())
+            .fetch_one(&mut *tx)
+            .await?;
+
+        let _updated_row: TestModel =
+            sqlx::query_as("UPDATE test set place = $1 where id = $2 RETURNING *")
+                .bind("Notgat".to_string())
+                .bind(&the_id.0)
+                .fetch_one(&mut *tx)
+                .await?;
+        if 0 < 0 {
+            tx.rollback().await?;
+        } else {
+            tx.commit().await?
+        }
+    }
+    let row_latest: Vec<TestModel> = sqlx::query_as("select * from test")
+        .fetch_all(&pool)
+        .await?;
+    assert_ne!(row_first.len(), row_latest.len());
     Ok(())
 }
 #[tokio::test]
 async fn test_transaction_failed_using_sqlx() -> Result<(), sqlx::Error> {
+    use sqlx::postgres::PgPoolOptions;
+    let pool = PgPoolOptions::new()
+        .max_connections(3)
+        .connect(dotenv::var("TEST_DB_STRING").unwrap().as_str())
+        .await?;
+    let row_first: Vec<TestModel> = sqlx::query_as("select * from test")
+        .fetch_all(&pool)
+        .await?;
+
+    {
+        let mut tx = pool.begin().await?;
+        let the_id: (i32,) = sqlx::query_as("INSERT INTO test (place) VALUES ($1) RETURNING id")
+            .bind("Notgauard".to_string())
+            .fetch_one(&mut *tx)
+            .await?;
+
+        let _updated_row: TestModel =
+            sqlx::query_as("UPDATE test set place = $1 where id = $2 RETURNING *")
+                .bind("Notgat".to_string())
+                .bind(&the_id.0)
+                .fetch_one(&mut *tx)
+                .await?;
+        if 0 < 1 {
+            tx.rollback().await?;
+        } else {
+            tx.commit().await?
+        }
+    }
+    let row_latest: Vec<TestModel> = sqlx::query_as("select * from test")
+        .fetch_all(&pool)
+        .await?;
+    assert_eq!(row_first.len(), row_latest.len());
     Ok(())
 }

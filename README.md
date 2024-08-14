@@ -8,8 +8,8 @@
   - insert row [✓]
   - update row [✓]
   - delete row [✓]
-  - transaction success [-]
-  - transaction failed [-]
+  - transaction success [✓]
+  - transaction failed [✓]
 - actix [-]
 - TBD
 ## Infrastructure
