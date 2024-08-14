@@ -10,3 +10,8 @@ CREATE TABLE
         WITH
             TIME ZONE DEFAULT NOW ()
     );
+
+INSERT INTO
+    test (place)
+VALUES
+    ('test place');
