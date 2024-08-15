@@ -11,6 +11,12 @@
   - transaction success [✓]
   - transaction failed [✓]
 - actix [-]
+  - api [-]
+    - healthcheck [-]
+    - read [-]
+    - create [-]
+    - update [-]
+    - delete [-]
 - TBD
 ## Infrastructure
 - Dockerize [-]
