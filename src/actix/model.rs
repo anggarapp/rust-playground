@@ -20,3 +20,8 @@ pub struct TestModel {
     #[serde(rename = "updatedAt")]
     pub updated_at: Option<chrono::DateTime<chrono::Utc>>,
 }
+
+#[derive(Deserialize)]
+pub struct TestCreate {
+    pub place: String,
+}

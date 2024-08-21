@@ -14,7 +14,7 @@
   - crud [-]
     - healthcheck [✓]
     - read [✓]
-    - create [-]
+    - create [✓]
     - update [-]
     - delete [-]
     - test [-]

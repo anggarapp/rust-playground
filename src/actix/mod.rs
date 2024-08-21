@@ -1,6 +1,6 @@
 mod model;
 use actix_web::{get, post, web, HttpResponse, Responder};
-use model::{TestModel, TestModelResponse};
+use model::{TestCreate, TestModel, TestModelResponse};
 use sqlx::postgres::PgPool;
 
 pub struct AppState {
@@ -25,6 +25,7 @@ pub async fn manual_handler() -> impl Responder {
 pub async fn health_check() -> impl Responder {
     HttpResponse::Ok()
 }
+
 #[get("/")]
 pub async fn get_test_row(data: web::Data<AppState>) -> impl Responder {
     let test_vec: Vec<TestModel> = sqlx::query_as("select * from test")
@@ -44,6 +45,27 @@ pub async fn get_test_row(data: web::Data<AppState>) -> impl Responder {
     });
 
     HttpResponse::Ok().json(test_json)
+}
+
+#[post("/")]
+pub async fn create_test_row(
+    data: web::Data<AppState>,
+    body: web::Json<TestCreate>,
+) -> impl Responder {
+    let query = sqlx::query("INSERT INTO test (place) VALUES ($1)")
+        .bind(&body.place)
+        .execute(&data.db)
+        .await
+        .map_err(|err: sqlx::Error| err.to_string());
+    match query {
+        Err(err) => {
+            return HttpResponse::InternalServerError()
+                .json(serde_json::json!({"status": "error","message": format!("{:?}", err)}));
+        }
+        Ok(_) => {
+            return HttpResponse::Ok().into();
+        }
+    }
 }
 
 #[get("/{id}")]

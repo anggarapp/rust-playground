@@ -26,7 +26,8 @@ async fn main() -> std::io::Result<()> {
         let test_scope = web::scope("/test")
             .service(health_check)
             .service(get_test_row)
-            .service(get_test_row_by_id);
+            .service(get_test_row_by_id)
+            .service(create_test_row);
 
         App::new()
             .app_data(web::Data::new(AppState { db: pool.clone() }))
