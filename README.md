@@ -15,7 +15,7 @@
     - healthcheck [✓]
     - read [✓]
     - create [✓]
-    - update [-]
+    - update [✓]
     - delete [-]
     - test [-]
 - TBD

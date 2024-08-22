@@ -1,5 +1,5 @@
 mod model;
-use actix_web::{get, post, web, HttpResponse, Responder};
+use actix_web::{get, post, put, web, HttpResponse, Responder};
 use model::{TestCreate, TestModel, TestModelResponse};
 use sqlx::postgres::PgPool;
 
@@ -85,6 +85,34 @@ pub async fn get_test_row_by_id(data: web::Data<AppState>, path: web::Path<i32>)
     });
 
     HttpResponse::Ok().json(test_json)
+}
+
+#[put("/{id}")]
+pub async fn update_test_row(
+    data: web::Data<AppState>,
+    body: web::Json<TestCreate>,
+    path: web::Path<i32>,
+) -> impl Responder {
+    let test_id = path.into_inner();
+    let query: Result<TestModel, sqlx::Error> =
+        sqlx::query_as("UPDATE test set place = $1 where id = $2 RETURNING *")
+            .bind(&body.place)
+            .bind(&test_id)
+            .fetch_one(&data.db)
+            .await;
+    match query {
+        Err(err) => {
+            return HttpResponse::InternalServerError()
+                .json(serde_json::json!({"status": "error","message": format!("{:?}", err)}));
+        }
+        Ok(test) => {
+            let test_response = filter_db_record(&test);
+            return HttpResponse::Ok().json(serde_json::json!({
+                "status": "success",
+                "test": test_response
+            }));
+        }
+    }
 }
 
 fn filter_db_record(test: &TestModel) -> TestModelResponse {
