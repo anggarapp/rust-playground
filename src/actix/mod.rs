@@ -1,5 +1,5 @@
 mod model;
-use actix_web::{get, post, put, web, HttpResponse, Responder};
+use actix_web::{delete, get, post, put, web, HttpResponse, Responder};
 use model::{TestCreate, TestModel, TestModelResponse};
 use sqlx::postgres::PgPool;
 
@@ -111,6 +111,25 @@ pub async fn update_test_row(
                 "status": "success",
                 "test": test_response
             }));
+        }
+    }
+}
+
+#[delete("/{id}")]
+pub async fn delete_test_row(data: web::Data<AppState>, path: web::Path<i32>) -> impl Responder {
+    let test_id = path.into_inner();
+    let query = sqlx::query("delete from test where id = $1")
+        .bind(&test_id)
+        .execute(&data.db)
+        .await
+        .map_err(|err: sqlx::Error| err.to_string());
+    match query {
+        Err(err) => {
+            return HttpResponse::InternalServerError()
+                .json(serde_json::json!({"status": "error","message": format!("{:?}", err)}));
+        }
+        Ok(_) => {
+            return HttpResponse::Ok().into();
         }
     }
 }

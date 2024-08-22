@@ -16,7 +16,7 @@
     - read [✓]
     - create [✓]
     - update [✓]
-    - delete [-]
+    - delete [✓]
     - test [-]
 - TBD
 ## Infrastructure

@@ -1,5 +1,5 @@
 use actix_web::{web, App, HttpServer};
-use rust_testy::actix::*;
+use rust_playground::actix::*;
 use sqlx::postgres::PgPoolOptions;
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
@@ -28,7 +28,8 @@ async fn main() -> std::io::Result<()> {
             .service(get_test_row)
             .service(get_test_row_by_id)
             .service(create_test_row)
-            .service(update_test_row);
+            .service(update_test_row)
+            .service(delete_test_row);
 
         App::new()
             .app_data(web::Data::new(AppState { db: pool.clone() }))
