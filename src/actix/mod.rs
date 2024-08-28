@@ -1,4 +1,5 @@
 mod model;
+mod test;
 use actix_web::{delete, get, post, put, web, HttpResponse, Responder};
 use model::{TestCreate, TestModel, TestModelResponse};
 use sqlx::postgres::PgPool;
@@ -52,18 +53,23 @@ pub async fn create_test_row(
     data: web::Data<AppState>,
     body: web::Json<TestCreate>,
 ) -> impl Responder {
-    let query = sqlx::query("INSERT INTO test (place) VALUES ($1)")
-        .bind(&body.place)
-        .execute(&data.db)
-        .await
-        .map_err(|err: sqlx::Error| err.to_string());
+    let query: Result<TestModel, sqlx::Error> =
+        sqlx::query_as("INSERT INTO test (place) VALUES ($1) RETURNING *")
+            .bind(&body.place)
+            .fetch_one(&data.db)
+            .await;
     match query {
         Err(err) => {
             return HttpResponse::InternalServerError()
                 .json(serde_json::json!({"status": "error","message": format!("{:?}", err)}));
         }
-        Ok(_) => {
-            return HttpResponse::Ok().into();
+        Ok(data) => {
+            let response = filter_db_record(&data);
+            let json_response = serde_json::json!({
+                "status": "success",
+                "test": response,
+            });
+            return HttpResponse::Ok().json(json_response);
         }
     }
 }
@@ -138,7 +144,7 @@ fn filter_db_record(test: &TestModel) -> TestModelResponse {
     TestModelResponse {
         id: test.id.to_owned(),
         place: test.place.to_owned(),
-        createdAt: test.created_at.unwrap(),
-        updatedAt: test.updated_at.unwrap(),
+        created_at: test.created_at.unwrap(),
+        updated_at: test.updated_at.unwrap(),
     }
 }

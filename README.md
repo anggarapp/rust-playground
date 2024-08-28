@@ -18,6 +18,10 @@
     - update [✓]
     - delete [✓]
     - test [-]
+      - read [✓]
+      - create [✓]
+      - update [✓]
+      - delete [✓]
 - TBD
 ## Infrastructure
 - Dockerize [-]

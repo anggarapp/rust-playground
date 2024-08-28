@@ -1,5 +1,5 @@
 use serde::{Deserialize, Serialize};
-use sqlx::FromRow;
+use sqlx::{self, FromRow, PgPool};
 
 #[derive(Debug, FromRow, Deserialize, Serialize)]
 #[allow(non_snake_case)]
@@ -10,6 +10,17 @@ pub struct TestModel {
     pub created_at: Option<chrono::DateTime<chrono::Utc>>,
     #[serde(rename = "updatedAt")]
     pub updated_at: Option<chrono::DateTime<chrono::Utc>>,
+}
+
+pub async fn migrate(pools: &PgPool) {
+    sqlx::migrate!()
+        .undo(pools, 4)
+        .await
+        .expect("Failed to migrate the database.");
+    sqlx::migrate!()
+        .run(pools)
+        .await
+        .expect("Failed to migrate the database.");
 }
 
 #[tokio::test]
@@ -116,6 +127,7 @@ async fn test_delete_row_using_sqlx() -> Result<(), sqlx::Error> {
         .fetch_all(&_pool)
         .await?;
     assert!(row_del.len() <= 0 as usize);
+    migrate(&_pool).await;
     Ok(())
 }
 
